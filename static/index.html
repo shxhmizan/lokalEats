@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LokalEats — Perak Food Recommender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,500;1,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+  <!-- ===== Landing ===== -->
+  <section id="view-landing" class="view active landing">
+    <div class="landing-bg" aria-hidden="true">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+      <div class="grain"></div>
+    </div>
+
+    <nav class="landing-nav">
+      <span class="logo-mark">🍜 <span class="logo-text">LokalEats</span></span>
+    </nav>
+
+    <div class="landing-hero">
+      <p class="eyebrow reveal">Perak, Malaysia</p>
+      <h1 class="hero-title reveal">Discover dishes,<br /><em>not just restaurants.</em></h1>
+      <p class="hero-subtitle reveal">A taste-matched guide to Perak's best plates — budget, spice,
+        halal, and cuisine, tuned to you in seconds.</p>
+      <button id="landing-cta" class="btn-hero reveal">
+        <span>Start your taste journey</span><span class="arrow">→</span>
+      </button>
+
+      <div class="hero-stats reveal">
+        <div class="stat"><span class="stat-num" id="stat-restaurants" data-target="928">0</span><span class="stat-label">Restaurants</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num" id="stat-dishes" data-target="2844">0</span><span class="stat-label">Dishes</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num" id="stat-districts" data-target="10">0</span><span class="stat-label">Districts</span></div>
+      </div>
+    </div>
+
+    <div class="cuisine-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Malay</span><span class="dot">·</span><span>Chinese</span><span class="dot">·</span><span>Tomyam</span><span class="dot">·</span><span>Seafood</span><span class="dot">·</span><span>Kopitiam</span><span class="dot">·</span><span>Cafe</span><span class="dot">·</span><span>Western</span><span class="dot">·</span><span>Indian</span><span class="dot">·</span><span>Burger</span><span class="dot">·</span><span>Bakery</span><span class="dot">·</span><span>Cendol</span><span class="dot">·</span>
+        <span>Malay</span><span class="dot">·</span><span>Chinese</span><span class="dot">·</span><span>Tomyam</span><span class="dot">·</span><span>Seafood</span><span class="dot">·</span><span>Kopitiam</span><span class="dot">·</span><span>Cafe</span><span class="dot">·</span><span>Western</span><span class="dot">·</span><span>Indian</span><span class="dot">·</span><span>Burger</span><span class="dot">·</span><span>Bakery</span><span class="dot">·</span><span>Cendol</span><span class="dot">·</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Onboarding wizard ===== -->
+  <section id="view-onboarding" class="view onboarding-view">
+    <div class="wizard-card">
+      <button id="wizard-close" class="wizard-close" aria-label="Back to landing">←</button>
+
+      <div class="wizard-progress">
+        <div class="progress-track"><div class="progress-fill" id="wizard-progress-fill"></div></div>
+      </div>
+
+      <div class="wizard-steps-wrap">
+        <div class="wizard-step active" data-step="1">
+          <p class="step-kicker">Step 1 of 2</p>
+          <h2>What should we call you?</h2>
+          <p class="step-hint">And what's your budget per dish?</p>
+
+          <input type="text" id="ob-name" class="input-elegant" placeholder="Your name" autocomplete="off" />
+
+          <label class="field-label">Budget: <span id="ob-budget-value" class="value-pill">RM 20</span> per dish</label>
+          <input type="range" id="ob-budget" min="5" max="50" step="1" value="20" />
+        </div>
+
+        <div class="wizard-step" data-step="2">
+          <p class="step-kicker">Step 2 of 2</p>
+          <h2>What flavors call to you?</h2>
+          <p class="step-hint">Pick a few — optional, but it sharpens your matches.</p>
+
+          <label class="field-label">Cuisines</label>
+          <div class="chip-select" id="ob-cuisines"></div>
+
+          <label class="field-label">Cravings</label>
+          <div class="chip-select" id="ob-tags"></div>
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <button id="wizard-back" class="btn-ghost hidden">← Back</button>
+        <span class="spacer"></span>
+        <button id="wizard-next" class="btn-primary">Next →</button>
+        <button id="wizard-finish" class="btn-primary hidden">Find my dishes ✨</button>
+      </div>
+      <p id="ob-error" class="error-text"></p>
+    </div>
+  </section>
+
+  <!-- ===== Main app ===== -->
+  <div id="app-shell" class="hidden">
+    <header id="app-header">
+      <div class="header-inner">
+        <span class="logo-mark">🍜 <span class="logo-text">LokalEats</span></span>
+        <nav id="main-nav">
+          <button data-view="recommend" class="nav-btn active">Recommend</button>
+          <button data-view="search" class="nav-btn">Search</button>
+          <button data-view="starred" class="nav-btn">⭐ Starred</button>
+        </nav>
+        <span class="user-greeting" id="user-greeting"></span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Recommendations -->
+      <section id="view-recommend" class="view active">
+        <div class="section-heading">
+          <h2>Picked for you</h2>
+          <p class="section-sub">Ranked by taste match, rating, and your likes.</p>
+        </div>
+        <div class="toolbar">
+          <select id="rec-district">
+            <option value="">All districts</option>
+          </select>
+          <div class="budget-filter">
+            <label for="rec-budget">Budget ≤ <span id="rec-budget-value" class="value-pill">RM 20</span></label>
+            <input type="range" id="rec-budget" min="5" max="50" step="1" value="20" />
+          </div>
+          <button id="rec-nearme" class="btn-secondary">📍 Near me</button>
+          <div class="view-toggle" id="rec-view-toggle">
+            <button type="button" data-mode="list" class="toggle-btn active">☰ List</button>
+            <button type="button" data-mode="map" class="toggle-btn">🗺️ Map</button>
+          </div>
+          <span id="rec-status" class="status-text"></span>
+        </div>
+        <div id="rec-grid" class="card-grid"></div>
+        <div id="rec-map" class="map-container hidden"></div>
+      </section>
+
+      <!-- Search (NLQ) -->
+      <section id="view-search" class="view">
+        <div class="section-heading">
+          <h2>Tell us what you're craving</h2>
+          <p class="section-sub">English, Bahasa Malaysia, or a mix — we'll figure it out.</p>
+        </div>
+        <div class="toolbar search-toolbar">
+          <input type="text" id="search-input" placeholder="e.g. nak seafood murah kat Lumut" />
+          <button id="search-submit" class="btn-primary">Search</button>
+        </div>
+        <div class="example-chips" id="example-chips">
+          <span class="example-chip">nak seafood murah kat Lumut</span>
+          <span class="example-chip">pedas gila bawah RM10 kat Ipoh</span>
+          <span class="example-chip">halal cafe brunch under RM15</span>
+        </div>
+        <div id="search-filters" class="filter-chips"></div>
+        <div class="toolbar">
+          <p id="search-status" class="status-text"></p>
+          <div class="view-toggle" id="search-view-toggle">
+            <button type="button" data-mode="list" class="toggle-btn active">☰ List</button>
+            <button type="button" data-mode="map" class="toggle-btn">🗺️ Map</button>
+          </div>
+        </div>
+        <div id="search-grid" class="card-grid"></div>
+        <div id="search-map" class="map-container hidden"></div>
+      </section>
+
+      <!-- Starred -->
+      <section id="view-starred" class="view">
+        <div class="section-heading">
+          <h2>Your starred dishes</h2>
+          <p class="section-sub">Places you've saved to come back to.</p>
+        </div>
+
+        <div class="achievements-panel">
+          <h3>🏆 Achievements</h3>
+          <div class="badge-row">
+            <span class="badge-label">🍜 Cuisine Explorer</span>
+            <div class="badge-bar-track"><div class="badge-bar-fill" id="badge-cuisine-fill"></div></div>
+            <span class="badge-count" id="badge-cuisine-count">0/11</span>
+          </div>
+          <div class="badge-row">
+            <span class="badge-label">📍 District Hopper</span>
+            <div class="badge-bar-track"><div class="badge-bar-fill" id="badge-district-fill"></div></div>
+            <span class="badge-count" id="badge-district-count">0/10</span>
+          </div>
+          <div class="badge-row badge-row-binary">
+            <span class="badge-label">⭐ First Star</span>
+            <span class="badge-status" id="badge-first-star">Locked</span>
+          </div>
+          <div class="badge-row badge-row-binary">
+            <span class="badge-label">🌶️ Brave Eater</span>
+            <span class="badge-status" id="badge-brave-eater">Locked</span>
+          </div>
+        </div>
+
+        <div id="starred-grid" class="card-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container" aria-live="polite"></div>
+
+  <template id="dish-card-template">
+    <div class="dish-card">
+      <div class="dish-image">
+        <span class="dish-emoji"></span>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <h3 class="dish-name"></h3>
+          <span class="price-badge"></span>
+        </div>
+        <p class="restaurant-name"></p>
+        <p class="city-district"></p>
+        <div class="card-meta">
+          <span class="spice-display"></span>
+          <span class="halal-badge"></span>
+          <span class="rating-display"></span>
+        </div>
+        <p class="explain-text hidden"></p>
+        <div class="card-actions">
+          <button class="btn-star" title="Star">⭐ Star</button>
+          <button class="btn-explain">✨ Why?</button>
+          <button class="btn-similar">More like this</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="skeleton-card-template">
+    <div class="dish-card skeleton-card">
+      <div class="skeleton-image"></div>
+      <div class="card-body">
+        <div class="skeleton-line w-70"></div>
+        <div class="skeleton-line w-40"></div>
+        <div class="skeleton-line w-90"></div>
+        <div class="skeleton-line w-50"></div>
+      </div>
+    </div>
+  </template>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
